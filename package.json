@@ -1,0 +1,28 @@
+{
+  "name": "github-proxy",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "index": "node index.js",
+    "format": "npx prettier . --write"
+  },
+  "keywords": [
+    "proxy",
+    "github",
+    "nodejs"
+  ],
+  "author": "xclhove",
+  "license": "MIT",
+  "server": {
+    "port": 9000
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.1"
+  }
+}
