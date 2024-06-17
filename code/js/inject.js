@@ -65,7 +65,7 @@ const vueApp = Vue.createApp({
             }
 
             // 处理阿里云函数冷启动导致的502
-            window.location.reload()
+            window.open(window.location.href, '_self')
         }
 
         onMounted(() => {
