@@ -5,3 +5,8 @@
 github proxy 是一个简单的 github 代理，用于解决 github 访问速度慢的问题。
 
 不同分支代表使用不同的语言/技术实现，可以根据自身情况进行选择。
+
+## 分支详情
+
+* nginx分支：使用 nginx反向代理 实现（推荐）
+* nodejs分支：使用 express + http-proxy-middleware 实现
