@@ -1,0 +1,50 @@
+edition: 3.0.0
+name: github-proxy-nginx
+access: "default"
+vars:
+  region: "cn-hongkong"
+resources:
+  framework:
+    component: fc3
+    props:
+      region: ${vars.region}
+      description: github proxy
+      runtime: custom
+      timeout: 60
+      cpu: 0.1
+      memorySize: 128
+      diskSize: 512
+      instanceConcurrency: 20
+      customRuntimeConfig:
+        command:
+          - nginx
+          - "-c"
+          - "/code/nginx.conf"
+          - "-g"
+          - "daemon off;"
+        port: 9000
+      functionName: "github-proxy-nginx"
+      code: ./code
+      triggers:
+        - triggerName: httpTrigger
+          triggerType: http
+          triggerConfig:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - HEAD
+              - OPTIONS
+            authType: anonymous
+  fc3_domain_0:
+    component: fc3-domain
+    props:
+      region: ${vars.region}
+      domainName: auto
+      protocol: HTTP
+      routeConfig:
+        routes:
+          - path: /*
+            functionName: ${resources.framework.props.functionName}
