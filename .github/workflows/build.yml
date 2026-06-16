@@ -1,0 +1,119 @@
+# ============================================================
+# GitHub Proxy — 自动构建与推送
+# ============================================================
+# 触发方式：推送符合 v* 格式的 Git 标签
+#
+# Git 标签示例：            Docker 标签：
+#   v1.27.4         →       ghcr.io/<owner>/github-proxy:1.27.4
+#   v1.27.4-1       →       ghcr.io/<owner>/github-proxy:1.27.4-1
+#
+# GITHUB_TOKEN 默认可用，无需额外配置
+# ============================================================
+
+name: Build and Push
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  IMAGE_NAME: github-proxy
+
+jobs:
+  build-and-push:
+    name: Build & Push
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write              # 创建 Release 需要 write
+      packages: write               # 推送到 GHCR 需要 write
+
+    steps:
+      # --------------------------------------------------
+      # 1. Checkout 代码
+      # --------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --------------------------------------------------
+      # 2. 从 Git 标签中提取版本号
+      #    输入：v1.27.4  →  输出：1.27.4
+      # --------------------------------------------------
+      - name: Extract version from Git tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+      # --------------------------------------------------
+      # 3. 设置 Docker Buildx
+      # --------------------------------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --------------------------------------------------
+      # 4. 登录 GitHub Container Registry
+      # --------------------------------------------------
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --------------------------------------------------
+      # 5. 构造完整 Docker 标签
+      #    格式：ghcr.io/<owner>/github-proxy:<版本号>
+      # --------------------------------------------------
+      - name: Build Docker tag
+        id: tags
+        run: |
+          OWNER="${{ github.repository_owner }}"
+          OWNER="${OWNER,,}"
+          TAG="ghcr.io/${OWNER}/${IMAGE_NAME}:${{ steps.version.outputs.version }}"
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+      # --------------------------------------------------
+      # 6. Build & Push
+      # --------------------------------------------------
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.tags.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --------------------------------------------------
+      # 7. 创建 GitHub Release
+      # --------------------------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: Nginx ${{ steps.version.outputs.version }}
+          body: |
+            ## GitHub Proxy
+
+            - **Base Image:** `nginx:${{ steps.version.outputs.version }}-alpine-amd64`
+            - **Docker Image:** `ghcr.io/${{ github.repository_owner }}/github-proxy:${{ steps.version.outputs.version }}`
+
+            ### 拉取命令
+
+            ```bash
+            docker pull ghcr.io/${{ github.repository_owner }}/github-proxy:${{ steps.version.outputs.version }}
+            ```
+
+            ### 本地运行
+
+            ```bash
+            docker run -d --name github-proxy -p 80:80 \
+              ghcr.io/${{ github.repository_owner }}/github-proxy:${{ steps.version.outputs.version }}
+            ```
+
+            > **需要 HTTPS！** 建议在实际部署时使用反向代理（如 Caddy、Nginx）或云服务商
+            > 的 TLS 终止功能来配置 HTTPS。
+          draft: false
+          prerelease: false
