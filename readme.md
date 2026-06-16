@@ -54,7 +54,6 @@ docker build -t github-proxy:1.31.1 .
 ```sh
 docker build \
   --build-arg NGINX_VERSION=1.31.1 \
-  --build-arg ALPINE_ARCH=amd64 \
   -t github-proxy:1.31.1 .
 ```
 

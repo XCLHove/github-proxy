@@ -1,7 +1,7 @@
 services:
   github-proxy-test:
     container_name: github-proxy
-    image: nginx:1.31.1-alpine-amd64
+    image: nginx:1.31.1-alpine
     ports:
       - 48080:80
     volumes:

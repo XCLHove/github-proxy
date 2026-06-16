@@ -7,18 +7,15 @@
 # 若需指定不同的 Nginx 基础镜像版本：
 #   docker build \
 #     --build-arg NGINX_VERSION=1.31.1 \
-#     --build-arg ALPINE_ARCH=amd64 \
 #     -t github-proxy:1.31.1 .
 # ============================================================
 
 ARG NGINX_VERSION=1.31.1
-ARG ALPINE_ARCH=amd64
 
-FROM nginx:${NGINX_VERSION}-alpine-${ALPINE_ARCH}
+FROM nginx:${NGINX_VERSION}-alpine
 
 # 在 FROM 之后重新声明 ARG，使其对以下指令可见
 ARG NGINX_VERSION
-ARG ALPINE_ARCH
 
 LABEL org.opencontainers.image.title="GitHub Proxy"
 LABEL org.opencontainers.image.description="GitHub 反向代理，解决网络访问问题"

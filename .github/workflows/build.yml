@@ -97,7 +97,7 @@ jobs:
           body: |
             ## GitHub Proxy
 
-            - **Base Image:** `nginx:${{ steps.version.outputs.version }}-alpine-amd64`
+            - **Base Image:** `nginx:${{ steps.version.outputs.version }}-alpine`
             - **Docker Image:** `ghcr.io/${{ github.repository_owner }}/github-proxy:${{ steps.version.outputs.version }}`
 
             ### 拉取命令
