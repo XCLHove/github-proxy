@@ -1,6 +1,6 @@
 services:
   github-proxy:
     container_name: github-proxy
-    image: ghcr.io/xclhove/github-proxy:1.27.4
+    image: ghcr.io/xclhove/github-proxy:1.31.1
     ports:
       - 80:80
